@@ -10,7 +10,6 @@ const Campanha = ({ user, setUser }) => {
   const [campanhaEditando, setCampanhaEditando] = useState(null);
   const [participacoes, setParticipacoes] = useState(JSON.parse(localStorage.getItem('participacoes')) || []);
   const [vencedora, setVencedora] = useState(null);
-  const [sugestoes, setSugestoes] = useState(JSON.parse(localStorage.getItem('sugestoes')) || []);
 
   const criarCampanha = () => {
     const novaCampanha = {
@@ -35,7 +34,7 @@ const Campanha = ({ user, setUser }) => {
     setPeriodo('');
     setPremio('');
     setCampanhaEditando(null);
-    setVencedora(null); // Resetando a vencedora também
+    setVencedora(null);
   };
 
   const apagarCampanha = (campanha) => {
@@ -50,7 +49,7 @@ const Campanha = ({ user, setUser }) => {
     setDescricao(campanha.descricao);
     setPeriodo(campanha.periodo);
     setPremio(campanha.premio);
-    setVencedora(campanha.vencedora); // Carregar vencedor da campanha
+    setVencedora(campanha.vencedora);
   };
 
   const salvarEdicao = () => {
@@ -68,7 +67,6 @@ const Campanha = ({ user, setUser }) => {
 
   const participarDaCampanha = (campanha) => {
     const participantesAtualizados = campanha.participantes || [];
-
     if (!participantesAtualizados.includes(user.nome)) {
       participantesAtualizados.push(user.nome);
     }
@@ -96,7 +94,6 @@ const Campanha = ({ user, setUser }) => {
       return;
     }
 
-    // Atualiza a campanha com o vencedor
     const campanhasAtualizadas = campanhas.map((c) => {
       if (c === campanha) {
         return { ...c, vencedora: sugestao };
@@ -112,16 +109,13 @@ const Campanha = ({ user, setUser }) => {
   return (
     <div>
       <h2>Bem-vindo, {user.nome}</h2>
-      <button onClick={() => setUser(null)}>Sair</button>
 
-      {/* Menu de Navegação */}
       <nav>
         <button onClick={() => setAbaAtiva('minhasCampanhas')}>Minhas Campanhas</button>
         <button onClick={() => setAbaAtiva('todasCampanhas')}>Campanhas Gerais</button>
         <button onClick={() => setAbaAtiva('minhasParticipacoes')}>Minhas Participações</button>
       </nav>
 
-      {/* Aba: Minhas Campanhas */}
       {abaAtiva === 'minhasCampanhas' && (
         <>
           <h3>{campanhaEditando ? 'Editar Campanha' : 'Nova Campanha'}</h3>
@@ -161,65 +155,44 @@ const Campanha = ({ user, setUser }) => {
               .map((c, index) => (
                 <li key={index}>
                   <strong>{c.nome}</strong> - Responsável: {c.responsavel}
-                  <button onClick={() => iniciarEdicao(c)}>Editar</button>
-                  <button onClick={() => apagarCampanha(c)}>Apagar</button>
-                  <h4>Vencedor:</h4>
-                  {c.vencedora ? (
-                    <p>{c.vencedora.descricao}</p>
-                  ) : (
-                    <div>
-                      <h4>Escolher Vencedor:</h4>
-                      <select
-                        onChange={(e) => {
-                          const selecionada = sugestoes.find(s => s.id === e.target.value);
-                          setVencedora(selecionada);
-                        }}
-                        value={vencedora ? vencedora.id : ''}
-                      >
-                        <option value="">Selecione uma sugestão</option>
-                        {sugestoes
-                          .filter(s => s.campanha === c.nome) // Garantir que estamos pegando sugestões dessa campanha
-                          .map((s, idx) => (
-                            <option key={idx} value={s.id}>
-                              {s.descricao}
-                            </option>
-                          ))}
-                      </select>
-                      <button onClick={() => anunciarVencedor(c, vencedora)}>
-                        Anunciar Vencedor
-                      </button>
-                    </div>
-                  )}
+                  <button className='edit' onClick={() => iniciarEdicao(c)}>Editar</button>
+                  <button className='clear' onClick={() => apagarCampanha(c)}>Apagar</button>
                 </li>
               ))}
           </ul>
         </>
       )}
 
-      {/* Aba: Todas as Campanhas */}
       {abaAtiva === 'todasCampanhas' && (
         <>
           <h3>Campanhas Gerais:</h3>
-          <ul>
+          <div className='camp-card'>
+          <div>
             {campanhas.map((c, index) => (
-              <li key={index}>
+              <div key={index}>
                 <strong>{c.nome}</strong> - Responsável: {c.responsavel}
-                <p><strong>Descrição:</strong> {c.descricao}</p>
-                <p><strong>Período:</strong> {c.periodo}</p>
-                <p><strong>Prêmio:</strong> {c.premio}</p>
+                <p>
+                  <strong>Descrição:</strong> {c.descricao}
+                </p>
+                <p>
+                  <strong>Período:</strong> {c.periodo}
+                </p>
+                <p>
+                  <strong>Prêmio:</strong> {c.premio}
+                </p>
                 {!c.participantes || !c.participantes.includes(user.nome) ? (
                   <button onClick={() => participarDaCampanha(c)}>Participar</button>
                 ) : (
                   <p>Você está participando desta campanha.</p>
                 )}
                 {c.vencedora && <p><strong>Vencedora:</strong> {c.vencedora.descricao}</p>}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
+          </div>
         </>
       )}
 
-      {/* Aba: Minhas Participações */}
       {abaAtiva === 'minhasParticipacoes' && (
         <>
           <h3>Campanhas que você está participando:</h3>
